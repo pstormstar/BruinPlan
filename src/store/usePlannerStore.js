@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { mockCourses } from '../data/mockCourses';
+import { supabase } from '../lib/supabaseClient';
 
 const YEARS = 4;
 const QUARTERS = ['Fall', 'Winter', 'Spring', 'Summer'];
@@ -16,6 +17,54 @@ export const usePlannerStore = create((set) => ({
   planner: initialPlanner,
   availableCourses: mockCourses,
   isAllExpanded: false,
+  currentUser: null,
+  isLoading: false,
+  error: null,
+
+  setCurrentUser: (user) => set({ currentUser: user }),
+
+  logout: async () => {
+    await supabase.auth.signOut();
+    set({ currentUser: null, planner: initialPlanner });
+  },
+
+  loadUserPlan: async (userId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data, error } = await supabase
+        .from('plans')
+        .select('planner_data')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
+      
+      if (data && data.planner_data) {
+        set({ planner: data.planner_data, isLoading: false });
+      } else {
+        set({ planner: initialPlanner, isLoading: false });
+      }
+    } catch (err) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
+
+  savePlan: async (userId) => {
+    try {
+      const state = usePlannerStore.getState();
+      const { error } = await supabase
+        .from('plans')
+        .upsert({
+          user_id: userId,
+          planner_data: state.planner,
+          updated_at: new Date()
+        }, { onConflict: 'user_id' });
+      
+      if (error) throw error;
+    } catch (err) {
+      set({ error: err.message });
+    }
+  },
 
   toggleExpandAll: () => set((state) => ({ isAllExpanded: !state.isAllExpanded })),
 

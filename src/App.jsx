@@ -1,14 +1,44 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { usePlannerStore } from './store/usePlannerStore';
+import { supabase } from './lib/supabaseClient';
 import CourseSidebar from './components/CourseSidebar';
 import PlannerGrid from './components/PlannerGrid';
+import Login from './components/Login';
 import './index.css';
 
 function App() {
   const moveCourse = usePlannerStore((state) => state.moveCourse);
   const isAllExpanded = usePlannerStore((state) => state.isAllExpanded);
   const toggleExpandAll = usePlannerStore((state) => state.toggleExpandAll);
+  const currentUser = usePlannerStore((state) => state.currentUser);
+  const setCurrentUser = usePlannerStore((state) => state.setCurrentUser);
+  const loadUserPlan = usePlannerStore((state) => state.loadUserPlan);
+  const logout = usePlannerStore((state) => state.logout);
+
+  // Check for existing session on mount
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        loadUserPlan(session.user.id);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        loadUserPlan(session.user.id);
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [setCurrentUser, loadUserPlan]);
 
   const onDragEnd = (result) => {
     const { source, destination, draggableId } = result;
@@ -40,11 +70,16 @@ function App() {
     );
   };
 
+  if (!currentUser) {
+    return <Login onLogin={(user) => { setCurrentUser(user); loadUserPlan(user.id); }} />;
+  }
+
   return (
     <div className="app-container">
       <header className="app-header">
         <div className="brand">
           <h1>BruinPlan</h1>
+          <p className="user-email">{currentUser?.email}</p>
         </div>
         <div className="header-actions">
           <button 
@@ -52,6 +87,12 @@ function App() {
             onClick={toggleExpandAll}
           >
             {isAllExpanded ? "Collapse All Cards" : "Expand All Cards"}
+          </button>
+          <button 
+            className="header-btn btn-logout" 
+            onClick={logout}
+          >
+            Logout
           </button>
         </div>
       </header>

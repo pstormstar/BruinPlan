@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 // Top-level component orchestrating the planner state and layout.
 import Sidebar from './Sidebar'
 import YearGrid from './YearGrid'
 import AddCourseForm from './AddCourseForm'
+import Login from './Login'
 import { initialPlan } from '../plannerData'
+import { supabase } from '../lib/supabaseClient'
 import '../planner.css'
 
 export default function Planner() {
@@ -16,9 +18,66 @@ export default function Planner() {
     }
   })
 
+  const [user, setUser] = useState(null)
+  const serverPlanId = useRef(null)
+
+  // save to localStorage always
   useEffect(() => {
     localStorage.setItem('plan', JSON.stringify(plan))
   }, [plan])
+
+  // auth listener
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null)
+    })
+    // check current user on mount
+    supabase.auth.getUser().then(res => setUser(res.data.user ?? null))
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  // load plans for user when they login
+  useEffect(() => {
+    if (!user) return
+    ;(async () => {
+      const { data, error } = await supabase.from('plans').select('id,name,data').eq('user_id', user.id)
+      if (error) {
+        console.error('load plans error', error)
+        return
+      }
+      if (data && data.length > 0) {
+        // take first plan
+        serverPlanId.current = data[0].id
+        setPlan(data[0].data)
+      } else {
+        // no server plan; migrate local storage plan to server
+        const local = localStorage.getItem('plan')
+        if (local) {
+          try {
+            const payload = JSON.parse(local)
+            const { data: insertData, error: insertErr } = await supabase.from('plans').insert({ user_id: user.id, name: 'My Plan', data: payload }).select().single()
+            if (!insertErr) serverPlanId.current = insertData.id
+          } catch (e) {
+            console.error('migration error', e)
+          }
+        }
+      }
+    })()
+  }, [user])
+
+  // save plan to server when user is logged in, debounced
+  useEffect(() => {
+    if (!user) return
+    const t = setTimeout(async () => {
+      try {
+        const upsert = { id: serverPlanId.current ?? undefined, user_id: user.id, name: 'My Plan', data: plan }
+        const { data: saved, error } = await supabase.from('plans').upsert(upsert).select().single()
+        if (error) console.error('save plan error', error)
+        else serverPlanId.current = saved.id
+      } catch (e) { console.error(e) }
+    }, 1000)
+    return () => clearTimeout(t)
+  }, [plan, user])
 
   function addYear() {
     const newYear = {
@@ -83,10 +142,19 @@ export default function Planner() {
       <div className="planner-content">
         <Sidebar onAddYear={addYear} onReset={resetPlan} />
         <main className="planner-main">
-          <div className="planner-controls">
-            <AddCourseForm years={plan} onAdd={handleAddCourse} />
-          </div>
-          <YearGrid plan={plan} onRemoveCourse={removeCourse} onEditCourse={(yid,qid,course)=>editCourse(yid,qid,course)} />
+          {/* if not logged in show login */}
+          {!user ? (
+            <div style={{padding:12}}>
+              <Login onLogin={(u)=>setUser(u)} />
+            </div>
+          ) : (
+            <>
+              <div className="planner-controls">
+                <AddCourseForm years={plan} onAdd={handleAddCourse} />
+              </div>
+              <YearGrid plan={plan} onRemoveCourse={removeCourse} onEditCourse={(yid,qid,course)=>editCourse(yid,qid,course)} />
+            </>
+          )}
         </main>
       </div>
     </div>

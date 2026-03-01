@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import QuarterColumn from './QuarterColumn';
 import { usePlannerStore } from '../store/usePlannerStore';
 
@@ -7,6 +7,20 @@ const QUARTERS = ['Fall', 'Winter', 'Spring', 'Summer'];
 
 const PlannerGrid = () => {
   const planner = usePlannerStore((state) => state.planner);
+  const currentUser = usePlannerStore((state) => state.currentUser);
+  const savePlan = usePlannerStore((state) => state.savePlan);
+
+  // Auto-save plan when it changes
+  useEffect(() => {
+    if (currentUser) {
+      // Debounce saves to avoid too frequent requests
+      const saveTimeout = setTimeout(() => {
+        savePlan(currentUser.id);
+      }, 1000); // Wait 1 second after last change before saving
+
+      return () => clearTimeout(saveTimeout);
+    }
+  }, [planner, currentUser, savePlan]);
 
   return (
     <div className="planner-grid">
