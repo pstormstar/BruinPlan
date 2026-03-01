@@ -1,35 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { DragDropContext } from '@hello-pangea/dnd';
+import { usePlannerStore } from './store/usePlannerStore';
+import CourseSidebar from './components/CourseSidebar';
+import PlannerGrid from './components/PlannerGrid';
+import { GraduationCap } from 'lucide-react';
+import './index.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const moveCourse = usePlannerStore((state) => state.moveCourse);
+  const isAllExpanded = usePlannerStore((state) => state.isAllExpanded);
+  const toggleExpandAll = usePlannerStore((state) => state.toggleExpandAll);
+
+  const onDragEnd = (result) => {
+    const { source, destination, draggableId } = result;
+
+    // Dropped outside a valid droppable
+    if (!destination) {
+      return;
+    }
+
+    // Dropped in the same place
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    // Extract course ID, handling the potential '-index' suffix
+    const courseId = source.droppableId === 'sidebar' 
+      ? draggableId 
+      : draggableId.substring(0, draggableId.lastIndexOf('-'));
+
+    moveCourse(
+      source.droppableId,
+      destination.droppableId,
+      source.index,
+      destination.index,
+      courseId
+    );
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app-container">
+      <header className="app-header">
+        <div className="brand">
+          <GraduationCap className="brand-icon" size={32} />
+          <h1>BruinPlan</h1>
+        </div>
+        <div className="header-actions">
+          <button 
+            className="header-btn" 
+            onClick={toggleExpandAll}
+          >
+            {isAllExpanded ? "Collapse All Cards" : "Expand All Cards"}
+          </button>
+        </div>
+      </header>
+      
+      <main className="main-content">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <CourseSidebar />
+          <PlannerGrid />
+        </DragDropContext>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;

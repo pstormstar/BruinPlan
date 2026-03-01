@@ -1,0 +1,20 @@
+export const mockCourses = [
+  { id: 'math-31a', code: 'MATH 31A', title: 'Differential and Integral Calculus', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'math-31b', code: 'MATH 31B', title: 'Integration and Infinite Series', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'math-32a', code: 'MATH 32A', title: 'Calculus of Several Variables', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'math-32b', code: 'MATH 32B', title: 'Calculus of Several Variables', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'math-33a', code: 'MATH 33A', title: 'Linear Algebra and Applications', units: 4, offered: ['Fall', 'Winter', 'Spring', 'Summer'] },
+  { id: 'math-33b', code: 'MATH 33B', title: 'Differential Equations', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'cs-31', code: 'CS 31', title: 'Introduction to Computer Science I', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'cs-32', code: 'CS 32', title: 'Introduction to Computer Science II', units: 4, offered: ['Winter', 'Spring'] },
+  { id: 'cs-33', code: 'CS 33', title: 'Introduction to Computer Organization', units: 5, offered: ['Fall', 'Spring'] },
+  { id: 'cs-35l', code: 'CS 35L', title: 'Software Construction', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'cs-111', code: 'CS 111', title: 'Operating Systems Principles', units: 5, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'cs-118', code: 'CS 118', title: 'Computer Network Fundamentals', units: 4, offered: ['Fall', 'Winter'] },
+  { id: 'cs-180', code: 'CS 180', title: 'Introduction to Algorithms and Complexity', units: 4, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'cs-181', code: 'CS 181', title: 'Introduction to Formal Languages and Automata', units: 4, offered: ['Winter', 'Spring'] },
+  { id: 'physics-1a', code: 'PHYSICS 1A', title: 'Physics for Scientists and Engineers: Mechanics', units: 5, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'physics-1b', code: 'PHYSICS 1B', title: 'Physics for Scientists and Engineers: Oscillations, Waves, Electric and Magnetic Fields', units: 5, offered: ['Fall', 'Winter', 'Spring'] },
+  { id: 'physics-1c', code: 'PHYSICS 1C', title: 'Physics for Scientists and Engineers: Electrodynamics, Optics, and Special Relativity', units: 5, offered: ['Fall', 'Spring'] },
+  { id: 'engr-96', code: 'ENGR 96', title: 'Introduction to Engineering Design', units: 2, offered: ['Fall', 'Winter', 'Spring'] }
+];
