@@ -94,12 +94,6 @@ function App() {
           <p className="user-email">{currentUser?.email}</p>
         </div>
         <div className="header-actions">
-          <button 
-            className="header-btn" 
-            onClick={toggleExpandAll}
-          >
-            {isAllExpanded ? "Collapse All Cards" : "Expand All Cards"}
-          </button>
           {currentUser ? (
             <button 
               className="header-btn btn-logout" 
