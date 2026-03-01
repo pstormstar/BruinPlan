@@ -47,9 +47,8 @@ export const usePlannerStore = create((set) => ({
         .select('planner_data')
         .eq('user_id', userId)
         .single();
-      
+      console.log('loadUserPlan result:', { data, error });
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
-      
       if (data && data.planner_data) {
         set({ planner: data.planner_data, isLoading: false });
       } else {
@@ -57,23 +56,25 @@ export const usePlannerStore = create((set) => ({
       }
     } catch (err) {
       set({ error: err.message, isLoading: false });
+      console.error('loadUserPlan error:', err);
     }
   },
 
   savePlan: async (userId) => {
     try {
       const state = usePlannerStore.getState();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('plans')
         .upsert({
           user_id: userId,
           planner_data: state.planner,
           updated_at: new Date()
         }, { onConflict: 'user_id' });
-      
+      console.log('savePlan result:', { data, error });
       if (error) throw error;
     } catch (err) {
       set({ error: err.message });
+      console.error('savePlan error:', err);
     }
   },
 

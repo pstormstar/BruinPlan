@@ -3,5 +3,7 @@ For HOTH XIII
 
 ## Setup & Deployment
 
-- See [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md) for instructions on setting up Supabase (authentication, environment variables, etc).
-- See [`VERCEL_DEPLOY.md`](./VERCEL_DEPLOY.md) for step-by-step deployment to Vercel.
+**To get started:**
+
+- Follow all steps in [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md) to set up your Supabase backend, authentication, database table, and security policies. This is required for the app to work!
+- For deploying your project, see [`VERCEL_DEPLOY.md`](./VERCEL_DEPLOY.md) for step-by-step instructions on deploying to Vercel.
