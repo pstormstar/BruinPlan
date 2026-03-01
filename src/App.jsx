@@ -3,13 +3,10 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import { usePlannerStore } from './store/usePlannerStore';
 import CourseSidebar from './components/CourseSidebar';
 import PlannerGrid from './components/PlannerGrid';
-import { GraduationCap } from 'lucide-react';
 import './index.css';
 
 function App() {
   const moveCourse = usePlannerStore((state) => state.moveCourse);
-  const isAllExpanded = usePlannerStore((state) => state.isAllExpanded);
-  const toggleExpandAll = usePlannerStore((state) => state.toggleExpandAll);
 
   const onDragEnd = (result) => {
     const { source, destination, draggableId } = result;
@@ -27,8 +24,11 @@ function App() {
       return;
     }
 
+    // Check if dragging from sidebar or a category
+    const isFromSidebar = source.droppableId === 'sidebar' || source.droppableId.startsWith('category-');
+
     // Extract course ID, handling the potential '-index' suffix
-    const courseId = source.droppableId === 'sidebar' 
+    const courseId = isFromSidebar 
       ? draggableId 
       : draggableId.substring(0, draggableId.lastIndexOf('-'));
 
@@ -45,16 +45,8 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="brand">
-          <GraduationCap className="brand-icon" size={32} />
+          <img src="/bruinBear.svg" alt="Bruin Logo" className="brand-icon" style={{ width: '32px', height: '32px' }} />
           <h1>BruinPlan</h1>
-        </div>
-        <div className="header-actions">
-          <button 
-            className="header-btn" 
-            onClick={toggleExpandAll}
-          >
-            {isAllExpanded ? "Collapse All Cards" : "Expand All Cards"}
-          </button>
         </div>
       </header>
       
